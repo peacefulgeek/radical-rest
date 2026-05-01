@@ -11,7 +11,7 @@ import {
   reverifyAsinsJob,
   seedAsinsJob,
 } from '../src/lib/cron-jobs.mjs';
-import { logCron, recentCronLog } from '../src/lib/db.mjs';
+import { logCron, recentCronLog, promoteDueQueuedArticles } from '../src/lib/db.mjs';
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
@@ -88,6 +88,39 @@ async function boot() {
     { timezone: 'UTC' }
   );
 
+  // QUEUED PUBLISHER: every 5 minutes, promote any queued articles whose
+  // published_at is now in the past. This is how the 500 pre-seeded
+  // staggered-future articles roll onto the live site over time.
+  cron.schedule(
+    '*/5 * * * *',
+    () => {
+      try {
+        const r = promoteDueQueuedArticles();
+        if (r.changes > 0) {
+          console.log(`[cron] queued-publisher promoted ${r.changes}`);
+          logCron('queued-publisher', 'ok', `promoted=${r.changes}`);
+        }
+      } catch (err) {
+        console.error('[cron] queued-publisher error', err);
+        logCron('queued-publisher', 'crash', String(err.message).slice(0, 200));
+      }
+    },
+    { timezone: 'UTC' }
+  );
+
+  // Also run once at boot so a fresh deploy publishes anything already due.
+  setTimeout(() => {
+    try {
+      const r = promoteDueQueuedArticles();
+      if (r.changes > 0) {
+        console.log(`[boot] queued-publisher promoted ${r.changes}`);
+        logCron('queued-publisher', 'ok', `boot promoted=${r.changes}`);
+      }
+    } catch (err) {
+      console.error('[boot] queued-publisher error', err);
+    }
+  }, 5_000);
+
   // First-boot seed (runs once 60s after boot, then never via cron).
   setTimeout(async () => {
     try {
@@ -113,11 +146,12 @@ async function boot() {
     }, 4 * 60 * 1000);
   }
 
-  console.log('[radical-rest] crons registered:');
-  console.log('  daily-generation: 5 5,11,13,15,17 * * 1-5  (UTC) [×5 slots]');
-  console.log('  refresh-daily:    0 3 * * *  (UTC)');
-  console.log('  refresh-weekly:   0 4 * * 0  (UTC)');
-  console.log('  reverify-asins:   0 2 * * 1  (UTC)');
+  console.log('[radical-rest] crons registered (in-process node-cron, NO Manus):');
+  console.log('  daily-generation:  5 9,11,13,15,17 * * 1-5  (UTC) [×5 slots]');
+  console.log('  queued-publisher:  */5 * * * *           (UTC) [promote staggered queue]');
+  console.log('  refresh-daily:     0 3 * * *             (UTC)');
+  console.log('  refresh-weekly:    0 4 * * 0             (UTC)');
+  console.log('  reverify-asins:    0 2 * * 1             (UTC)');
   console.log('[radical-rest] recent cron log:', recentCronLog(5));
 }
 

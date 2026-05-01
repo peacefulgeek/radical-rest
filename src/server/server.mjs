@@ -16,11 +16,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import {
   listPublishedArticles,
-  getArticleBySlug,
+  getPublishedArticleBySlug as getArticleBySlug,
   countPublishedArticles,
   listAllArticleSlugs,
   recentCronLog,
   recentGateLog,
+  countByStatus,
 } from '../lib/db.mjs';
 import { SITE, canonicalUrl } from '../lib/site-config.mjs';
 
@@ -140,6 +141,7 @@ export async function createServer() {
     res.json({
       site: SITE.name,
       published_count: countPublishedArticles(),
+      counts_by_status: countByStatus(),
       cron_log: recentCronLog(20),
       gate_log: recentGateLog(20),
       now: new Date().toISOString(),

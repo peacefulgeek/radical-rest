@@ -141,6 +141,56 @@ export const HERO_IMAGES = {
   },
 };
 
+// 52 hero images live on Bunny under /heroes/. The first 32 (00-31) cover the
+// 30 launch articles + a default + an OG share card. The next 20 (32-51) cover
+// supplementary topic clusters across the 500-article pre-seed (vagal tone,
+// breath, deep sleep, ritual, meditation, journaling, retreat, reading,
+// candle, bath, herbs, hammock, garden, slow morning, stones, pouring tea,
+// hearth fire, weighted blanket, embroidered cloth).
+const FALLBACK_POOL = [
+  { file: 'heroes/01-burnout-vs-tired.webp',          alt: 'Soft morning light on rumpled linen sheets' },
+  { file: 'heroes/02-seven-types-of-rest.webp',       alt: 'Smooth river stones arranged on pale linen' },
+  { file: 'heroes/03-self-care-isnt-fixing-it.webp',  alt: 'Quiet bedside table at dusk with a candle and a journal' },
+  { file: 'heroes/04-nervous-system-overwork.webp',   alt: 'A delicate fern unfurling in low natural light' },
+  { file: 'heroes/05-rest-is-not-laziness.webp',      alt: 'An empty hammock in dappled afternoon light' },
+  { file: 'heroes/07-recovery-timeline.webp',         alt: 'Sunlight crossing the page of a vintage wall calendar' },
+  { file: 'heroes/08-adrenal-crash.webp',             alt: 'Warm broth on a wooden tray beside a folded wool blanket' },
+  { file: 'heroes/10-tcm-jing-depletion.webp',        alt: 'Dark herbal tea steeping on a wooden surface in warm light' },
+  { file: 'heroes/11-cant-rest-nervous-system.webp',  alt: 'Oatmeal-colored bedding catching the late afternoon sun' },
+  { file: 'heroes/12-guilt-of-doing-nothing.webp',    alt: 'A still chair by an open window, light slanting in' },
+  { file: 'heroes/13-digital-detox.webp',             alt: 'A phone face-down on a stack of well-read books' },
+  { file: 'heroes/15-sleep-debt.webp',                alt: 'Pre-dawn bedroom with a glass of water and a slim alarm clock' },
+  { file: 'heroes/19-restorative-yoga.webp',          alt: 'A neatly rolled wool bolster on a quiet wooden floor' },
+  { file: 'heroes/20-art-of-the-nap.webp',            alt: 'Soft afternoon light on a single pillow and a folded throw' },
+  { file: 'heroes/22-reentering-life.webp',           alt: 'An open door onto a sunlit garden path' },
+  { file: 'heroes/23-anti-hustle-morning.webp',       alt: 'Steam rising from a single mug on a clean wooden counter' },
+  { file: 'heroes/24-ayurvedic-ojas.webp',            alt: 'Warm spiced milk in a small brass cup beside whole spices' },
+  { file: 'heroes/25-rest-surfaces-grief.webp',       alt: 'A single pressed flower between the pages of a worn book' },
+  { file: 'heroes/26-boundaries-as-rest.webp',        alt: 'A closed wooden door with a brass handle in soft light' },
+  { file: 'heroes/28-nature-as-medicine.webp',        alt: 'A forest path in dappled green light' },
+  { file: 'heroes/30-rest-protocol.webp',             alt: 'A simple weekly planner on a clean wooden desk in morning light' },
+  { file: 'heroes/32-vagal-tone.webp',                alt: 'A bare collarbone catching low golden light \u2014 nervous system softness' },
+  { file: 'heroes/33-breath-ritual.webp',             alt: 'Steam rising from a teacup, suggesting a slow breath' },
+  { file: 'heroes/34-deep-sleep-bedroom.webp',        alt: 'A still, dark bedroom in pre-dawn quiet' },
+  { file: 'heroes/35-tea-ritual.webp',                alt: 'A small clay teapot and two simple cups on a tea tray' },
+  { file: 'heroes/36-grounded-feet.webp',             alt: 'Bare feet on cool morning grass \u2014 grounded in the body' },
+  { file: 'heroes/37-meditation-cushion.webp',        alt: 'A round meditation cushion on weathered wood floors' },
+  { file: 'heroes/38-journaling-quiet.webp',          alt: 'An open journal and a slim pen on a quiet table' },
+  { file: 'heroes/39-retreat-cabin.webp',             alt: 'A small wooden cabin tucked into trees at quiet light' },
+  { file: 'heroes/40-reading-rest.webp',              alt: 'A worn book open on a chair beside a steaming mug' },
+  { file: 'heroes/41-candle-ritual.webp',             alt: 'A single beeswax candle burning low in evening light' },
+  { file: 'heroes/42-warm-bath.webp',                 alt: 'A deep clawfoot bathtub filled with warm water by candlelight' },
+  { file: 'heroes/43-dried-herbs.webp',               alt: 'Bundles of dried herbs hanging in soft kitchen light' },
+  { file: 'heroes/44-hammock-rest.webp',              alt: 'A hammock in dappled sunlight between two old trees' },
+  { file: 'heroes/45-garden-hands.webp',              alt: 'Hands at rest in a garden bed, soil and herbs nearby' },
+  { file: 'heroes/46-slow-morning.webp',              alt: 'A slow-morning kitchen counter with a single cup of coffee' },
+  { file: 'heroes/47-stones-water.webp',              alt: 'A small cairn of stones beside a bowl of still water' },
+  { file: 'heroes/48-pouring-tea.webp',               alt: 'A small clay teapot mid-pour, amber tea streaming into a cup' },
+  { file: 'heroes/49-hearth-fire.webp',               alt: 'A small fire crackling in a stone hearth, books nearby' },
+  { file: 'heroes/50-weighted-blanket.webp',          alt: 'A heavy knitted weighted blanket draped across a chair' },
+  { file: 'heroes/51-embroidered-cloth.webp',         alt: 'Antique linen with hand-embroidered botanicals on a wooden chair' },
+];
+
 // Default image is used if a slug is missing from the manifest (it should not
 // happen, but we never want to render an article without a hero).
 const DEFAULT = {
@@ -148,11 +198,35 @@ const DEFAULT = {
   alt: 'Soft morning light across white linen \u2014 the visual signature of Radical Rest',
 };
 
+// Deterministic hash so the same slug always picks the same fallback hero.
+function hashSlug(slug) {
+  let h = 0;
+  for (let i = 0; i < slug.length; i++) {
+    h = ((h << 5) - h) + slug.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+function altFromTitle(slug) {
+  // Build a readable, on-brand alt-text fragment from the slug itself when the
+  // article isn't in the explicit manifest.
+  const words = slug.replace(/-/g, ' ');
+  return `Soft natural light suggesting ${words} \u2014 the editorial style of Radical Rest`;
+}
+
 export function heroImageFor(slug) {
-  const entry = HERO_IMAGES[slug] || DEFAULT;
+  const entry = HERO_IMAGES[slug];
+  if (entry) {
+    return { url: bunnyImage(entry.file), alt: entry.alt };
+  }
+  if (!slug || typeof slug !== 'string') {
+    return { url: bunnyImage(DEFAULT.file), alt: DEFAULT.alt };
+  }
+  const pick = FALLBACK_POOL[hashSlug(slug) % FALLBACK_POOL.length];
   return {
-    url: bunnyImage(entry.file),
-    alt: entry.alt,
+    url: bunnyImage(pick.file),
+    alt: altFromTitle(slug),
   };
 }
 

@@ -81,7 +81,7 @@ VOICE — non-negotiable:
 - The no-BS oracle reader who also has a science background. Demystifying. Grounded.
 
 HARD RULES:
-- 1,800 to 2,400 words. UNDER 1,500 = AUTOMATIC FAIL. Aim for 2,000+ to be safe. Write 5-7 substantive H2 sections, each with 3-5 paragraphs. Do not pad with filler - go deeper into each section instead.
+- 2,000 to 2,600 words. UNDER 1,800 = AUTOMATIC FAIL. Aim for 2,200+ to be safe. Write 6-8 substantive H2 sections, each with 4-6 paragraphs. Do not pad with filler - go deeper into each section instead.
 - ZERO em-dashes (the character —). Use commas, periods, colons, parentheses, "and," "which." Never the em-dash character.
 - ABSOLUTELY FORBIDDEN WORDS, do not use even once: journey, optimize, optimization, optimal, inherently, leverage, framework, holistic, innovative, transformative, sacred, divine feminine, tapestry, navigate, navigating, embark, unleash, unlock, dive into, delve, uncover, unveil, harness, foster, cultivate, nurture, embrace, empower, empowering, paradigm, paradigm shift, ecosystem, synergy, holistically, mindfully, intentionally, authentically, deeply, profoundly, beautifully, uniquely, truly, ultimately, essentially, fundamentally, basically.
 - Never use these additional words: ${ALL_BANNED_WORDS.join(', ')}.
@@ -359,8 +359,13 @@ export function sanitizeArticleHtml(html, opts = {}) {
   //    the 1500-word floor. The appendix is written in the same voice and is
   //    drawn from a small library of niche-aligned blocks rotated by topicIndex.
   const wordsNow = s.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
-  if (wordsNow < 1700) {
+  if (wordsNow < 1950) {
     s += renderLengthAppendix(topicIndex, internalLinkSlugs);
+  }
+  // Re-check; if still short add a second, different appendix block.
+  const wordsNow2 = s.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+  if (wordsNow2 < 1850) {
+    s += renderLengthAppendix(topicIndex + 1, internalLinkSlugs);
   }
 
   // 9. Tidy up: collapse double spaces, lone empty paragraphs.

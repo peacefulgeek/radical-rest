@@ -171,8 +171,8 @@ export function hasOracleLoverByline(html) {
 export function runQualityGate(articleBody, opts = {}) {
   const failures = [];
   const words = countWords(articleBody);
-  if (words < 1500) failures.push(`word-count-too-low:${words}`);
-  if (words > 2800) failures.push(`word-count-too-high:${words}`);
+  if (words < 1800) failures.push(`word-count-too-low:${words}`);
+  if (words > 3200) failures.push(`word-count-too-high:${words}`);
 
   const amzCount = countAmazonLinks(articleBody);
   if (amzCount < 3) failures.push(`amazon-links-too-few:${amzCount}`);

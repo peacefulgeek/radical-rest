@@ -63,6 +63,10 @@ export async function generateOneArticle({ topicIndex, publishedAt = null, force
   }
 
   const now = new Date().toISOString();
+  const pubAt = publishedAt || now;
+  // Anything dated in the future is queued; the publishing cron will flip
+  // status='published' when the slot arrives. Past-dated stays 'published'.
+  const status = (new Date(pubAt).getTime() > Date.now() + 60_000) ? 'queued' : 'published';
   insertArticle({
     slug,
     title: a.title || topic,
@@ -72,8 +76,9 @@ export async function generateOneArticle({ topicIndex, publishedAt = null, force
     word_count: finalGate.wordCount,
     amazon_link_count: finalGate.amazonLinks,
     hero_image_url: heroImageFor(slug).url,
-    published_at: publishedAt || now,
+    published_at: pubAt,
     updated_at: now,
+    status,
     meta_description: a.meta_description || a.tldr || '',
     opener_type: a.opener_type || '',
     conclusion_type: a.conclusion_type || '',

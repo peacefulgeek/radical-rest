@@ -10,9 +10,11 @@
 import { TOPICS, slugifyTopic } from '../src/data/topics.mjs';
 import { generateOneArticle } from '../src/lib/generate-article.mjs';
 import { getArticleBySlug } from '../src/lib/db.mjs';
+import { publishedAtFor } from './stagger-dates.mjs';
 
 const i = parseInt(process.argv[2] || '0', 10);
-const publishedAt = process.argv[3] || null;
+// CLI override > computed stagger date > null (= now).
+const publishedAt = process.argv[3] || publishedAtFor(i) || null;
 
 (async () => {
   if (!Number.isFinite(i) || i < 0 || i >= TOPICS.length) {

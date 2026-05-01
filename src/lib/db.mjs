@@ -104,9 +104,31 @@ export function countPublishedArticles() {
 }
 
 export function getArticleBySlug(slug) {
+  // Public route caller filters on status; this returns any non-deleted row
+  // so the orchestrator can de-dupe against queued articles too.
+  return db
+    .prepare(`SELECT * FROM articles WHERE slug=?`)
+    .get(slug);
+}
+
+// Convenience for the public Article route: only return if published.
+export function getPublishedArticleBySlug(slug) {
   return db
     .prepare(`SELECT * FROM articles WHERE slug=? AND status='published'`)
     .get(slug);
+}
+
+// Promote any queued articles whose published_at is now in the past.
+export function promoteDueQueuedArticles() {
+  const now = new Date().toISOString();
+  return db
+    .prepare(`UPDATE articles SET status='published' WHERE status='queued' AND published_at <= ?`)
+    .run(now);
+}
+
+export function countByStatus() {
+  const rows = db.prepare(`SELECT status, COUNT(*) as c FROM articles GROUP BY status`).all();
+  return Object.fromEntries(rows.map(r => [r.status, r.c]));
 }
 
 export function insertArticle(a) {
