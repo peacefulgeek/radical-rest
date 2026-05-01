@@ -1,0 +1,38 @@
+{
+  "name": "radical-rest",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Radical Rest — burnout recovery, anti-hustle, the art of doing nothing. Site 83.",
+  "scripts": {
+    "dev": "node --experimental-sqlite scripts/dev.mjs",
+    "build": "vite build --ssrManifest && vite build --ssr entry-server.tsx --outDir ../../dist/server",
+    "build:client": "vite build --ssrManifest",
+    "build:server": "vite build --ssr entry-server.tsx --outDir ../../dist/server",
+    "start": "NODE_ENV=production node --experimental-sqlite scripts/start-with-cron.mjs",
+    "generate:launch": "node --experimental-sqlite scripts/generate-launch-articles.mjs",
+    "generate:one": "node --experimental-sqlite scripts/generate-one.mjs",
+    "verify": "node --experimental-sqlite scripts/verify.mjs"
+  },
+  "dependencies": {
+    "compression": "^1.7.4",
+    "express": "^4.21.0",
+    "node-cron": "^3.0.3",
+    "openai": "^4.67.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.27.0",
+    "serve-static": "^1.16.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.2",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
